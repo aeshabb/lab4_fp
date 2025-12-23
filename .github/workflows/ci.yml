@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           opam update
-          opam install dune alcotest -y
+          opam install dune alcotest ocamlformat -y
           opam install . --deps-only --with-test -y
 
       - name: Build
@@ -57,11 +57,11 @@ jobs:
       - name: Install dependencies
         run: |
           opam update
-          opam install dune alcotest -y
+          opam install dune alcotest ocamlformat -y
           opam install . --deps-only --with-test -y
 
       - name: Install linting tools
-        run: opam install ocamlformat ocp-indent -y
+        run: opam install ocp-indent -y
 
       - name: Check ocamlformat
         run: |
