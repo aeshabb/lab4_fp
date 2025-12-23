@@ -18,6 +18,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 5.1.x
+          opam-depext: false
 
       - name: Install dependencies
         run: opam install . --deps-only --with-test --with-dev-setup -y
@@ -42,6 +43,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 5.1.x
+          opam-depext: false
 
       - name: Install dependencies
         run: opam install . --deps-only --with-dev-setup -y

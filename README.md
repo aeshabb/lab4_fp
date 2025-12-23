@@ -1,6 +1,6 @@
 # Applicative Parser Combinators in OCaml
 
-[![CI](https://github.com/aeshabb/parser-combinator/actions/workflows/ci.yml/badge.svg)](https://github.com/aeshabb/parser-combinator/actions/workflows/ci.yml)
+Беля Алексей 408256
 
 Библиотека комбинаторов парсеров на OCaml, вдохновлённая [статьёй об аппликативных парсерах на Haskell](https://habr.com/ru/articles/436234/).
 
@@ -283,13 +283,3 @@ make watch
 - **Test** — запуск unit-тестов (Alcotest)
 - **Lint** — проверка форматирования (ocamlformat, ocp-indent)
 
-## Лицензия
-
-MIT
-
-## Ссылки
-
-- [Аппликативные парсеры на Haskell (Habr)](https://habr.com/ru/articles/436234/)
-- [OCaml Documentation](https://ocaml.org/docs)
-- [Dune Build System](https://dune.build/)
-- [Alcotest Testing Framework](https://github.com/mirage/alcotest)
