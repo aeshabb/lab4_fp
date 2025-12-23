@@ -18,7 +18,8 @@ lint:
 	dune build @fmt
 
 install:
-	opam install . --deps-only --with-test --with-dev-setup -y
+	opam install . --deps-only --with-test -y
+	opam install ocamlformat ocp-indent -y
 
 run:
 	dune exec parser_combinator_demo

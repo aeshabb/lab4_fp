@@ -15,5 +15,5 @@
   (ocaml (>= 4.14))
   dune
   (alcotest :with-test)
-  (ocamlformat :with-dev-setup)
-  (ocp-indent :with-dev-setup)))
+  (ocamlformat :dev)
+  (ocp-indent :dev)))

@@ -24,7 +24,7 @@ jobs:
           OPAMCONFIRMLEVEL: unsafe-yes
 
       - name: Install dependencies
-        run: opam install . --deps-only --with-test --with-dev-setup -y
+        run: opam install . --deps-only --with-test -y
 
       - name: Build
         run: opam exec -- dune build
@@ -52,7 +52,7 @@ jobs:
           OPAMCONFIRMLEVEL: unsafe-yes
 
       - name: Install dependencies
-        run: opam install . --deps-only --with-dev-setup -y
+        run: opam install . --deps-only --with-test -y
 
       - name: Install linting tools
         run: opam install ocamlformat ocp-indent -y
