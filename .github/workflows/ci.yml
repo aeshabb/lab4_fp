@@ -25,7 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          opam install dune -y
+          opam update
+          opam install dune alcotest -y
           opam install . --deps-only --with-test -y
 
       - name: Build
@@ -55,7 +56,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          opam install dune -y
+          opam update
+          opam install dune alcotest -y
           opam install . --deps-only --with-test -y
 
       - name: Install linting tools

@@ -1,175 +1,176 @@
-(** Applicative Parser Combinator Library
+(** Библиотека аппликативных парсер-комбинаторов
 
-    This module provides a functional parser combinator library inspired by Haskell's applicative
-    parsers. *)
+    Этот модуль предоставляет функциональную библиотеку парсер-комбинаторов, вдохновлённую
+    аппликативными парсерами на Haskell. *)
 
-(** {1 Core Types} *)
+(** {1 Основные типы} *)
 
 type 'a t
-(** A parser for values of type ['a]. *)
+(** Парсер значений типа ['a]. *)
 
 val run_parser : 'a t -> string -> (string * 'a) list
-(** Unwrap the parser function *)
+(** Распаковать функцию парсера *)
 
 val parse_string : 'a t -> string -> 'a option
-(** Try to parse a complete string. Returns [Some value] if parsing succeeds with no remaining
-    input, [None] otherwise. *)
+(** Попробовать разобрать строку целиком. Возвращает [Some value], если разбор успешен и не
+    осталось непрочитанного ввода, и [None] в противном случае. *)
 
 val parse_all : 'a t -> string -> (string * 'a) list
-(** Parse a string and return all possible results *)
+(** Разобрать строку и вернуть все возможные результаты *)
 
-(** {1 Basic Parsers} *)
+(** {1 Базовые парсеры} *)
 
 val satisfy : (char -> bool) -> char t
-(** Parser that accepts a single character satisfying a predicate *)
+(** Парсер, принимающий один символ, удовлетворяющий предикату *)
 
 val pred_p : (char -> bool) -> char t
-(** Alias for [satisfy] *)
+(** Синоним для [satisfy] *)
 
 val char_p : char -> char t
-(** Parser for a specific character *)
+(** Парсер для конкретного символа *)
 
 val empty : 'a t
-(** Parser that always fails *)
+(** Парсер, который всегда завершается неуспехом *)
 
 val pure : 'a -> 'a t
-(** Parser that succeeds without consuming input, returning the given value *)
+(** Парсер, который всегда успешно завершается, не потребляя вход, и возвращает заданное
+    значение *)
 
 val lazy_p : (unit -> 'a t) -> 'a t
-(** Lazy parser wrapper to enable recursion without stack overflow *)
+(** Ленивый обёрточный парсер для организации рекурсии без переполнения стека *)
 
 val eof : unit t
-(** Parser that returns unit if at the end of input *)
+(** Парсер, который успешно завершается только в конце ввода *)
 
-(** {1 Functor Operations} *)
+(** {1 Операции функтора} *)
 
 val fmap : ('a -> 'b) -> 'a t -> 'b t
-(** Map a function over the result of a parser *)
+(** Применить функцию к результату парсера *)
 
 val ( <$> ) : ('a -> 'b) -> 'a t -> 'b t
-(** Infix operator for [fmap]: [f <$> p] is equivalent to [fmap f p] *)
+(** Инфиксный оператор для [fmap]: [f <$> p] эквивалентен [fmap f p] *)
 
 val ( <$ ) : 'a -> 'b t -> 'a t
-(** Replace the result with a constant value *)
+(** Заменить результат константным значением *)
 
 val ( $> ) : 'a t -> 'b -> 'b t
-(** Replace the result with a constant value (flipped) *)
+(** Заменить результат константным значением (аргументы переставлены местами) *)
 
-(** {1 Applicative Operations} *)
+(** {1 Аппликативные операции} *)
 
 val apply : ('a -> 'b) t -> 'a t -> 'b t
-(** Apply a parser containing a function to a parser containing a value *)
+(** Применить парсер с функцией к парсеру со значением *)
 
 val ( <*> ) : ('a -> 'b) t -> 'a t -> 'b t
-(** Infix operator for [apply] *)
+(** Инфиксный оператор для [apply] *)
 
 val ( *> ) : 'a t -> 'b t -> 'b t
-(** Sequence two parsers, keeping only the result of the second *)
+(** Последовательно выполнить два парсера, сохраняя только результат второго *)
 
 val ( <* ) : 'a t -> 'b t -> 'a t
-(** Sequence two parsers, keeping only the result of the first *)
+(** Последовательно выполнить два парсера, сохраняя только результат первого *)
 
 val lift2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
-(** Lift a binary function to work on parsers *)
+(** Поднять бинарную функцию на уровень парсеров *)
 
 val lift3 : ('a -> 'b -> 'c -> 'd) -> 'a t -> 'b t -> 'c t -> 'd t
-(** Lift a ternary function to work on parsers *)
+(** Поднять тернарную функцию на уровень парсеров *)
 
-(** {1 Alternative Operations} *)
+(** {1 Альтернативные операции} *)
 
 val alt : 'a t -> 'a t -> 'a t
-(** Try first parser, if it fails try second parser *)
+(** Сначала попробовать первый парсер, при неуспехе — второй *)
 
 val ( <|> ) : 'a t -> 'a t -> 'a t
-(** Infix operator for [alt] *)
+(** Инфиксный оператор для [alt] *)
 
 val many : 'a t -> 'a list t
-(** Parse zero or more occurrences *)
+(** Разобрать ноль или больше вхождений *)
 
 val some : 'a t -> 'a list t
-(** Parse one or more occurrences *)
+(** Разобрать одно или больше вхождений *)
 
 val optional : 'a t -> 'a option t
-(** Optional parser - returns [Some x] if succeeds, [None] otherwise *)
+(** Необязательный парсер — возвращает [Some x] при успехе и [None] при неуспехе *)
 
-(** {1 String Parsers} *)
+(** {1 Строковые парсеры} *)
 
 val string_p : string -> string t
-(** Parser for a specific string prefix *)
+(** Парсер для конкретного строкового префикса *)
 
 val skip_string : string -> unit t
-(** Parser for a string prefix, returns unit *)
+(** Парсер для строкового префикса, возвращающий [()] *)
 
 val skip_while : (char -> bool) -> unit t
-(** Skip characters while predicate holds *)
+(** Пропускать символы, пока предикат истинный *)
 
 val take_while : (char -> bool) -> string t
-(** Take characters while predicate holds *)
+(** Считать символы, пока предикат истинный *)
 
 val take_while1 : (char -> bool) -> string t
-(** Take at least one character while predicate holds *)
+(** Считать как минимум один символ, пока предикат истинный *)
 
 val skip_spaces : unit t
-(** Skip whitespace characters *)
+(** Пропустить все пробельные символы *)
 
-(** {1 Character Class Parsers} *)
+(** {1 Парсеры классов символов} *)
 
 val digit : char t
-(** Parse a digit character *)
+(** Разобрать цифру *)
 
 val letter : char t
-(** Parse a letter character *)
+(** Разобрать букву *)
 
 val alphanum : char t
-(** Parse an alphanumeric character *)
+(** Разобрать букву или цифру *)
 
-(** {1 Numeric Parsers} *)
+(** {1 Числовые парсеры} *)
 
 val natural : int t
-(** Parse a natural number (non-negative integer) *)
+(** Разобрать натуральное число (неотрицательное целое) *)
 
 val integer : int t
-(** Parse an integer (optionally negative) *)
+(** Разобрать целое число (возможно, отрицательное) *)
 
-(** {1 Combinators} *)
+(** {1 Комбинаторы} *)
 
 val between : 'a t -> 'b t -> 'c t -> 'c t
-(** Parse something between two other parsers *)
+(** Разобрать что‑то между двумя другими парсерами *)
 
 val sep_by : 'a t -> 'b t -> 'b list t
-(** Parse items separated by a separator *)
+(** Разобрать элементы, разделённые разделителем (возможно ноль элементов) *)
 
 val sep_by1 : 'a t -> 'b t -> 'b list t
-(** Parse items separated by a separator (at least one item) *)
+(** Разобрать элементы, разделённые разделителем (как минимум один элемент) *)
 
 val chainl1 : 'a t -> ('a -> 'a -> 'a) t -> 'a t
-(** Chain left-associative binary operations *)
+(** Связать левосочетательные бинарные операции в цепочку *)
 
 val chainr1 : 'a t -> ('a -> 'a -> 'a) t -> 'a t
-(** Chain right-associative binary operations *)
+(** Связать правосочетательные бинарные операции в цепочку *)
 
-(** {1 Utility Functions} *)
+(** {1 Вспомогательные функции} *)
 
 val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
-(** Bind operator (monadic) for chaining parsers *)
+(** Оператор связывания (монада) для последовательного комбинирования парсеров *)
 
 val ( >> ) : 'a t -> 'b t -> 'b t
-(** Sequence operator (monadic), discarding first result *)
+(** Последовательное выполнение (монада), результат первого парсера отбрасывается *)
 
 val choice : 'a t list -> 'a t
-(** Choice from a list of parsers *)
+(** Альтернатива из списка парсеров *)
 
 val count : int -> 'a t -> 'a list t
-(** Count: parse exactly n occurrences *)
+(** Разобрать ровно [n] вхождений *)
 
 val one_of : string -> char t
-(** Parse one of the given characters *)
+(** Разобрать один из указанных символов *)
 
 val none_of : string -> char t
-(** Parse none of the given characters *)
+(** Разобрать символ, не входящий в указанный набор *)
 
 val look_ahead : 'a t -> 'a t
-(** Look ahead - try parser without consuming input *)
+(** Взгляд вперёд — попробовать парсер, не потребляя ввод *)
 
 val not_followed_by : 'a t -> unit t
-(** Not followed by - succeeds if parser fails *)
+(** Условие «не следует за» — успешно, если указанный парсер завершился неуспехом *)

@@ -1,34 +1,34 @@
-(** Arithmetic Expression Parser
+(** Парсер арифметических выражений
 
-    This module implements a parser for simple arithmetic expressions following the grammar from the
-    Habr article. *)
+    Этот модуль реализует парсер простых арифметических выражений по грамматике из статьи на
+    Habr. *)
 
-(** Binary operators *)
+(** Бинарные операторы *)
 type operator = Add | Mul
 
-(** Expression AST *)
+(** AST выражений *)
 type expr = ConstExpr of int | BinaryExpr of expr * operator * expr | NegateExpr of expr
 
 val string_of_operator : operator -> string
-(** Convert operator to string *)
+(** Преобразовать оператор в строку *)
 
 val string_of_expr : expr -> string
-(** Convert expression to string *)
+(** Преобразовать выражение в строку *)
 
 val eval : expr -> int
-(** Evaluate an expression to an integer *)
+(** Вычислить значение выражения до целого числа *)
 
 val const_parser : expr Parser.t
-(** Parser for constant expressions *)
+(** Парсер константных выражений *)
 
 val bin_op_parser : operator Parser.t
-(** Parser for binary operators *)
+(** Парсер бинарных операторов *)
 
 val expression : expr Parser.t
-(** Main expression parser *)
+(** Главный парсер выражений *)
 
 val parse_and_eval : string -> int option
-(** Parse and evaluate an expression string *)
+(** Разобрать и вычислить выражение *)
 
 val parse : string -> expr option
-(** Parse an expression string to AST *)
+(** Разобрать выражение в AST *)
