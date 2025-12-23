@@ -13,7 +13,7 @@
  (description "A functional parser combinator library inspired by Haskell's applicative parsers")
  (depends
   (ocaml (>= 4.14))
-  dune
+  (dune (>= 3.0))
   (alcotest :with-test)
   (ocamlformat :dev)
   (ocp-indent :dev)))
