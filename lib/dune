@@ -1,0 +1,3 @@
+(library
+ (name parser_combinator)
+ (public_name parser_combinator))

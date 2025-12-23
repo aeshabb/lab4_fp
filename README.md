@@ -1,0 +1,295 @@
+# Applicative Parser Combinators in OCaml
+
+[![CI](https://github.com/aeshabb/parser-combinator/actions/workflows/ci.yml/badge.svg)](https://github.com/aeshabb/parser-combinator/actions/workflows/ci.yml)
+
+Библиотека комбинаторов парсеров на OCaml, вдохновлённая [статьёй об аппликативных парсерах на Haskell](https://habr.com/ru/articles/436234/).
+
+## Описание
+
+Данная библиотека реализует функциональный подход к парсингу с использованием комбинаторов парсеров. Парсер представляет собой функцию, которая принимает строку и возвращает список возможных результатов разбора.
+
+Основные особенности:
+- **Функциональный стиль** — парсеры являются функциями первого класса
+- **Аппликативный интерфейс** — операторы `<$>`, `<*>`, `*>`, `<*` для комбинирования парсеров
+- **Альтернативный интерфейс** — операторы `<|>`, `many`, `some` для выбора и повторений
+- **Монадический интерфейс** — оператор `>>=` для последовательного связывания парсеров
+- **Богатый набор комбинаторов** — ready-to-use парсеры для частых задач
+
+## Установка
+
+### Требования
+
+- OCaml >= 4.14
+- Dune >= 3.0
+- opam
+
+### Установка зависимостей
+
+```bash
+opam install . --deps-only --with-test --with-dev-setup -y
+```
+
+### Сборка
+
+```bash
+make build
+# или
+dune build
+```
+
+### Запуск тестов
+
+```bash
+make test
+# или
+dune runtest
+```
+
+### Форматирование кода
+
+```bash
+make fmt
+# или
+dune fmt
+```
+
+## Использование
+
+### Базовый пример
+
+```ocaml
+open Parser_combinator.Parser
+
+(* Парсер для одиночного символа *)
+let p = char_p 'a'
+
+(* Парсинг строки *)
+let result = parse_string p "abc"
+(* result = Some 'a' *)
+
+(* Комбинирование парсеров *)
+let digit = satisfy (fun c -> c >= '0' && c <= '9')
+let digits = some digit
+let number = fmap (fun chars -> 
+  int_of_string (String.of_seq (List.to_seq chars))
+) digits
+```
+
+### Аппликативный стиль
+
+```ocaml
+open Parser_combinator.Parser
+
+(* Парсер для пары координат: (x, y) *)
+type point = { x : int; y : int }
+
+let point_parser =
+  let make_point x y = { x; y } in
+  make_point
+  <$> (char_p '(' *> natural)
+  <*> (string_p ", " *> natural <* char_p ')')
+
+let result = parse_string point_parser "(10, 20)"
+(* result = Some { x = 10; y = 20 } *)
+```
+
+### Альтернативы
+
+```ocaml
+open Parser_combinator.Parser
+
+(* Парсер для булевых значений *)
+let bool_parser =
+  (true <$ string_p "true") <|> (false <$ string_p "false")
+
+let result1 = parse_string bool_parser "true"   (* Some true *)
+let result2 = parse_string bool_parser "false"  (* Some false *)
+let result3 = parse_string bool_parser "maybe"  (* None *)
+```
+
+### Пример парсера арифметических выражений
+
+Библиотека включает полный пример парсера арифметических выражений, следующего грамматике из статьи:
+
+```
+expr      ::= constExpr | binOpExpr | negExpr
+const     ::= int
+int       ::= digit{digit}
+digit     ::= '0' | ... | '9'
+binOpExpr ::= '(' expr ' ' binOp ' ' expr ')'
+binOp     ::= '+' | '*'
+negExpr   ::= '-' expr
+```
+
+```ocaml
+open Parser_combinator.Expr_parser
+
+(* Парсинг и вычисление выражения *)
+let result = parse_and_eval "(1 + ((2 + 3) * (4 + 5)))"
+(* result = Some 46 *)
+
+(* Парсинг в AST *)
+let ast = parse "(1 + 2)"
+(* ast = Some (BinaryExpr (ConstExpr 1, Add, ConstExpr 2)) *)
+```
+
+### Запуск демо
+
+```bash
+make run
+# или
+dune exec parser_combinator_demo
+```
+
+Демо-приложение позволяет интерактивно вводить арифметические выражения и получать результат их вычисления.
+
+## Структура проекта
+
+```
+lab4/
+├── lib/                      # Библиотека
+│   ├── parser.ml            # Основной модуль парсера
+│   ├── parser.mli           # Интерфейс парсера
+│   ├── expr_parser.ml       # Пример: парсер выражений
+│   ├── expr_parser.mli      # Интерфейс парсера выражений
+│   └── dune
+├── bin/                      # Исполняемые файлы
+│   ├── main.ml              # Демо-приложение
+│   └── dune
+├── test/                     # Тесты
+│   ├── test_parser.ml       # Unit-тесты
+│   └── dune
+├── .github/workflows/        # CI/CD
+│   └── ci.yml
+├── .ocamlformat             # Конфигурация форматтера
+├── .ocp-indent              # Конфигурация отступов
+├── dune-project             # Конфигурация проекта
+├── Makefile                 # Команды сборки
+└── README.md                # Документация
+```
+
+## API Reference
+
+### Базовые парсеры
+
+| Функция | Тип | Описание |
+|---------|-----|----------|
+| `satisfy` | `(char -> bool) -> char t` | Парсер символа по предикату |
+| `char_p` | `char -> char t` | Парсер конкретного символа |
+| `string_p` | `string -> string t` | Парсер строки |
+| `pure` | `'a -> 'a t` | Парсер, возвращающий значение без потребления ввода |
+| `empty` | `'a t` | Парсер, всегда завершающийся неудачей |
+| `eof` | `unit t` | Парсер конца ввода |
+
+### Функторные операции
+
+| Оператор | Тип | Описание |
+|----------|-----|----------|
+| `<$>` | `('a -> 'b) -> 'a t -> 'b t` | Применить функцию к результату парсера |
+| `<$` | `'a -> 'b t -> 'a t` | Заменить результат константой |
+| `$>` | `'a t -> 'b -> 'b t` | Заменить результат константой (флип) |
+
+### Аппликативные операции
+
+| Оператор | Тип | Описание |
+|----------|-----|----------|
+| `<*>` | `('a -> 'b) t -> 'a t -> 'b t` | Применить парсер функции к парсеру значения |
+| `*>` | `'a t -> 'b t -> 'b t` | Последовательность, оставить правый результат |
+| `<*` | `'a t -> 'b t -> 'a t` | Последовательность, оставить левый результат |
+| `lift2` | `('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t` | Поднять бинарную функцию |
+| `lift3` | `('a -> 'b -> 'c -> 'd) -> 'a t -> 'b t -> 'c t -> 'd t` | Поднять тернарную функцию |
+
+### Альтернативные операции
+
+| Оператор/Функция | Тип | Описание |
+|------------------|-----|----------|
+| `<\|>` | `'a t -> 'a t -> 'a t` | Попробовать первый, при неудаче — второй |
+| `many` | `'a t -> 'a list t` | Ноль или более повторений |
+| `some` | `'a t -> 'a list t` | Одно или более повторений |
+| `optional` | `'a t -> 'a option t` | Опциональный парсер |
+| `choice` | `'a t list -> 'a t` | Выбор из списка парсеров |
+
+### Комбинаторы
+
+| Функция | Тип | Описание |
+|---------|-----|----------|
+| `between` | `'a t -> 'b t -> 'c t -> 'c t` | Парсить между двумя парсерами |
+| `sep_by` | `'a t -> 'b t -> 'b list t` | Элементы, разделённые сепаратором |
+| `sep_by1` | `'a t -> 'b t -> 'b list t` | Минимум один элемент с сепаратором |
+| `chainl1` | `'a t -> ('a -> 'a -> 'a) t -> 'a t` | Левоассоциативная цепочка |
+| `chainr1` | `'a t -> ('a -> 'a -> 'a) t -> 'a t` | Правоассоциативная цепочка |
+| `count` | `int -> 'a t -> 'a list t` | Ровно n повторений |
+
+### Символьные парсеры
+
+| Функция | Тип | Описание |
+|---------|-----|----------|
+| `digit` | `char t` | Цифра 0-9 |
+| `letter` | `char t` | Буква a-z, A-Z |
+| `alphanum` | `char t` | Буква или цифра |
+| `natural` | `int t` | Натуральное число |
+| `integer` | `int t` | Целое число (с опциональным минусом) |
+
+### Строковые парсеры
+
+| Функция | Тип | Описание |
+|---------|-----|----------|
+| `take_while` | `(char -> bool) -> string t` | Взять символы пока выполняется предикат |
+| `take_while1` | `(char -> bool) -> string t` | Минимум один символ по предикату |
+| `skip_while` | `(char -> bool) -> unit t` | Пропустить символы по предикату |
+| `skip_spaces` | `unit t` | Пропустить пробельные символы |
+| `one_of` | `string -> char t` | Один из указанных символов |
+| `none_of` | `string -> char t` | Любой символ кроме указанных |
+
+## Разработка
+
+### Форматирование
+
+Проект использует `ocamlformat` для форматирования кода:
+
+```bash
+dune fmt
+```
+
+### Линтинг
+
+CI проверяет форматирование и отступы:
+
+```bash
+make lint
+```
+
+### Документация
+
+Генерация документации:
+
+```bash
+make doc
+```
+
+### Режим наблюдения
+
+Автоматическая пересборка при изменениях:
+
+```bash
+make watch
+```
+
+## CI/CD
+
+Проект настроен с GitHub Actions для автоматической проверки:
+
+- **Build** — сборка проекта
+- **Test** — запуск unit-тестов (Alcotest)
+- **Lint** — проверка форматирования (ocamlformat, ocp-indent)
+
+## Лицензия
+
+MIT
+
+## Ссылки
+
+- [Аппликативные парсеры на Haskell (Habr)](https://habr.com/ru/articles/436234/)
+- [OCaml Documentation](https://ocaml.org/docs)
+- [Dune Build System](https://dune.build/)
+- [Alcotest Testing Framework](https://github.com/mirage/alcotest)

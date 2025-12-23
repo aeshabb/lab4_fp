@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 5.1.x
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test --with-dev-setup -y
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Run tests
+        run: opam exec -- dune runtest
+
+      - name: Check formatting
+        run: opam exec -- dune build @fmt
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 5.1.x
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-dev-setup -y
+
+      - name: Install linting tools
+        run: opam install ocamlformat ocp-indent -y
+
+      - name: Check ocamlformat
+        run: |
+          opam exec -- dune build @fmt
+          opam exec -- dune fmt 2>&1 || (echo "Code is not formatted. Run 'dune fmt' to fix." && exit 1)
+
+      - name: Check with ocp-indent
+        run: |
+          find lib test bin -name "*.ml" -o -name "*.mli" | while read file; do
+            opam exec -- ocp-indent "$file" > "$file.indented"
+            if ! diff -q "$file" "$file.indented" > /dev/null 2>&1; then
+              echo "Indentation issue in $file"
+              diff "$file" "$file.indented" || true
+            fi
+            rm "$file.indented"
+          done

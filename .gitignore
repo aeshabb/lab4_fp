@@ -1,0 +1,57 @@
+# Dune build directory
+_build/
+*.install
+
+# OCaml compiled files
+*.annot
+*.cmo
+*.cma
+*.cmi
+*.a
+*.o
+*.cmx
+*.cmxs
+*.cmxa
+
+# OCaml generated files
+*.spot
+*.spit
+*.byte
+*.native
+*.exe
+
+# OCaml documentation
+*.odoc
+_doc/
+
+# Merlin (OCaml IDE support)
+.merlin
+
+# OCaml toplevel
+*.top
+
+# OCaml coverage
+bisect*.coverage
+bisect*.out
+_coverage/
+
+# Opam
+*.opam
+!*.opam.template
+*.opam.locked
+_opam/
+
+# Editor/IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+*.log
+
+# Temporary files
+*.tmp
+*.bak
