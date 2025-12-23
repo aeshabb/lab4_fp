@@ -2,3 +2,8 @@
  (name main)
  (public_name parser_combinator_demo)
  (libraries parser_combinator))
+
+(executable
+ (name json_validator)
+ (public_name json_validator)
+ (libraries parser_combinator))

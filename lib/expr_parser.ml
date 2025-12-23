@@ -32,7 +32,7 @@ let string_of_operator = function Add -> "+" | Mul -> "*"
 let rec string_of_expr = function
   | ConstExpr n -> string_of_int n
   | BinaryExpr (e1, op, e2) ->
-      Printf.sprintf "(%s %s %s)" (string_of_expr e1) (string_of_operator op) (string_of_expr e2)
+    Printf.sprintf "(%s %s %s)" (string_of_expr e1) (string_of_operator op) (string_of_expr e2)
   | NegateExpr e -> Printf.sprintf "-%s" (string_of_expr e)
 
 (** Вычислить значение выражения до целого числа *)

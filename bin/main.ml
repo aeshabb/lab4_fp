@@ -21,10 +21,10 @@ let () =
     if line = "quit" then print_endline "Пока!"
     else begin
       (match parse line with
-      | Some expr ->
-          Printf.printf "Разобрано: %s\n" (string_of_expr expr);
-          Printf.printf "Результат: %d\n" (eval expr)
-      | None -> print_endline "Ошибка разбора: некорректное выражение");
+       | Some expr ->
+         Printf.printf "Разобрано: %s\n" (string_of_expr expr);
+         Printf.printf "Результат: %d\n" (eval expr)
+       | None -> print_endline "Ошибка разбора: некорректное выражение");
       print_newline ();
       loop ()
     end

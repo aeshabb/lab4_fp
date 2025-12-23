@@ -1,14 +1,3 @@
-(** Библиотека аппликативных парсер-комбинаторов
-
-    Этот модуль предоставляет функциональную библиотеку парсер-комбинаторов, вдохновлённую
-    аппликативными парсерами на Haskell. Он следует подходу, описанному в статье «Аппликативные
-    парсеры на Haskell».
-
-    Парсер — это функция, которая принимает строку и возвращает список возможных результатов
-    разбора, где каждый результат — пара (оставшаяся строка, разобранное значение). *)
-
-(** {1 Основные типы} *)
-
 (** Парсер значений типа ['a]. Внутри это функция из строки в список пар (оставшаяся_строка,
     значение). *)
 type 'a t = Parser of (string -> (string * 'a) list)
@@ -29,12 +18,12 @@ let parse_all (Parser p) s = p s
 let satisfy pred =
   Parser
     (fun s ->
-      match s with
-      | "" -> []
-      | s when String.length s > 0 ->
-          let c = s.[0] in
-          if pred c then [ (String.sub s 1 (String.length s - 1), c) ] else []
-      | _ -> [])
+       match s with
+       | "" -> []
+       | s when String.length s > 0 ->
+         let c = s.[0] in
+         if pred c then [ (String.sub s 1 (String.length s - 1), c) ] else []
+       | _ -> [])
 
 (** Синоним для [satisfy] — совпадает с названием из статьи на Haskell *)
 let pred_p = satisfy
@@ -114,15 +103,15 @@ let many (Parser p) =
 let some (Parser p) =
   Parser
     (fun s ->
-      match p s with
-      | [] -> []
-      | results ->
-          let rec go acc s =
-            match p s with
-            | [] -> [ (s, List.rev acc) ]
-            | results' -> List.concat_map (fun (rest, x) -> go (x :: acc) rest) results'
-          in
-          List.concat_map (fun (rest, x) -> go [ x ] rest) results)
+       match p s with
+       | [] -> []
+       | results ->
+         let rec go acc s =
+           match p s with
+           | [] -> [ (s, List.rev acc) ]
+           | results' -> List.concat_map (fun (rest, x) -> go (x :: acc) rest) results'
+         in
+         List.concat_map (fun (rest, x) -> go [ x ] rest) results)
 
 (** Необязательный парсер — возвращает [Some x] при успехе и [None] при неуспехе *)
 let optional p = (fun x -> Some x) <$> p <|> pure None
@@ -134,9 +123,9 @@ let string_p str =
   let len = String.length str in
   Parser
     (fun s ->
-      if String.length s >= len && String.sub s 0 len = str then
-        [ (String.sub s len (String.length s - len), str) ]
-      else [])
+       if String.length s >= len && String.sub s 0 len = str then
+         [ (String.sub s len (String.length s - len), str) ]
+       else [])
 
 (** Парсер для строкового префикса, возвращающий [()] *)
 let skip_string str = () <$ string_p str
@@ -145,32 +134,32 @@ let skip_string str = () <$ string_p str
 let skip_while pred =
   Parser
     (fun s ->
-      let rec find_end i =
-        if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
-      in
-      let end_idx = find_end 0 in
-      [ (String.sub s end_idx (String.length s - end_idx), ()) ])
+       let rec find_end i =
+         if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
+       in
+       let end_idx = find_end 0 in
+       [ (String.sub s end_idx (String.length s - end_idx), ()) ])
 
 (** Считать символы, пока предикат истинный *)
 let take_while pred =
   Parser
     (fun s ->
-      let rec find_end i =
-        if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
-      in
-      let end_idx = find_end 0 in
-      [ (String.sub s end_idx (String.length s - end_idx), String.sub s 0 end_idx) ])
+       let rec find_end i =
+         if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
+       in
+       let end_idx = find_end 0 in
+       [ (String.sub s end_idx (String.length s - end_idx), String.sub s 0 end_idx) ])
 
 (** Считать как минимум один символ, пока предикат истинный *)
 let take_while1 pred =
   Parser
     (fun s ->
-      let rec find_end i =
-        if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
-      in
-      let end_idx = find_end 0 in
-      if end_idx = 0 then []
-      else [ (String.sub s end_idx (String.length s - end_idx), String.sub s 0 end_idx) ])
+       let rec find_end i =
+         if i >= String.length s then i else if pred s.[i] then find_end (i + 1) else i
+       in
+       let end_idx = find_end 0 in
+       if end_idx = 0 then []
+       else [ (String.sub s end_idx (String.length s - end_idx), String.sub s 0 end_idx) ])
 
 (** Пропустить все пробельные символы *)
 let skip_spaces = skip_while (fun c -> c = ' ' || c = '\t' || c = '\n' || c = '\r')
