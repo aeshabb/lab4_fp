@@ -4,10 +4,7 @@
 type binop = Add | Sub | Mul | Div
 
 (** Выражения *)
-type expr =
-  | Const of int
-  | BinOp of expr * binop * expr
-  | Negate of expr
+type expr = Const of int | BinOp of expr * binop * expr | Negate of expr
 
 val string_of_binop : binop -> string
 (** Преобразовать оператор в строку *)

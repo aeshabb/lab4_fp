@@ -11,8 +11,8 @@ let () =
 
   match Parser_combinator.Json_parser.parse content with
   | Some json ->
-    print_endline "Valid JSON";
-    print_endline (Parser_combinator.Json_parser.to_string json)
+      print_endline "Valid JSON";
+      print_endline (Parser_combinator.Json_parser.to_string json)
   | None ->
-    Printf.eprintf "Invalid JSON\n";
-    exit 1
+      Printf.eprintf "Invalid JSON\n";
+      exit 1
